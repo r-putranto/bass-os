@@ -45,8 +45,16 @@ jobs:
           chmod a+x ~/bin/repo
           echo "$HOME/bin" >> $GITHUB_PATH
 
+      - name: Configure Git Identity & Environment
+        run: |
+          git config --global user.email "runner@github.com"
+          git config --global user.name "GitHub Runner"
+          export TERM=xterm
+
       - name: Unfold Bass OS Source
         run: |
+          # Patch repo flags to avoid SHA1 shallow clone issues if script calls repo sync
+          sed -i 's/repo sync/repo sync --no-clone-bundle --no-tags -j$(nproc)/g' unfold_bliss.sh || true
           bash unfold_bliss.sh
 
       - name: Inject ARM Translation (libndk)
